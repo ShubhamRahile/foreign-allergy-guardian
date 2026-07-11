@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Foreign Allergy Guardian{% endblock %}
+
+{% block content %}
+<!-- Welcome & Status Row -->
+<div class="row align-items-center mb-5">
+    <div class="col-md-8">
+        <h1 class="fw-bold mb-1">Hello, {{ user.username|capfirst }}!</h1>
+        <p class="text-muted fs-5 mb-0">Your AI Dietary Defender Agent is active and standing guard.</p>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="{% url 'scan' %}" class="btn btn-primary-custom px-4 py-2 me-2">
+            <i class="bi bi-qr-code-scan"></i> Scan Barcode
+        </a>
+        <a href="{% url 'ocr_scan' %}" class="btn btn-outline-light px-4 py-2">
+            <i class="bi bi-camera"></i> Scan Label OCR
+        </a>
+    </div>
+</div>
+
+<!-- Profile Alert Warning -->
+{% if not has_allergies %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card card-glass border-warning" style="background: rgba(245, 158, 11, 0.05);">
+            <div class="card-body d-md-flex align-items-center justify-content-between p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="fs-1 text-warning"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                    <div>
+                        <h4 class="fw-bold text-warning mb-1">Allergy Profile Not Configured</h4>
+                        <p class="text-muted mb-0">Please set up your list of severe food allergens so the AI Defender Agent can guard your food safely.</p>
+                    </div>
+                </div>
+                <div class="mt-3 mt-md-0">
+                    <a href="{% url 'profile' %}" class="btn btn-warning px-4 py-2 fw-semibold text-dark">
+                        <i class="bi bi-person-fill-gear"></i> Set Up Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Stats Section -->
+<div class="row g-4 mb-5">
+    <!-- Stat 1: Total Scans -->
+    <div class="col-md-4">
+        <div class="card card-glass h-100 p-3">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted text-uppercase fw-semibold mb-1">Total Scans</h6>
+                    <h2 class="display-5 fw-bold mb-0">{{ total_scans }}</h2>
+                </div>
+                <div class="fs-1 text-primary"><i class="bi bi-qr-code"></i></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stat 2: Dangerous Scans -->
+    <div class="col-md-4">
+        <div class="card card-glass h-100 p-3">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted text-uppercase fw-semibold mb-1">Dangerous Scans</h6>
+                    <h2 class="display-5 fw-bold text-danger mb-0">{{ dangerous_scans }}</h2>
+                </div>
+                <div class="fs-1 text-danger {% if dangerous_scans > 0 %}pulse-danger rounded-circle{% endif %}"><i class="bi bi-x-circle-fill"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat 3: Safe Scans -->
+    <div class="col-md-4">
+        <div class="card card-glass h-100 p-3">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted text-uppercase fw-semibold mb-1">Safe Products</h6>
+                    <h2 class="display-5 fw-bold text-success mb-0">{{ safe_scans }}</h2>
+                </div>
+                <div class="fs-1 text-success"><i class="bi bi-check-circle-fill"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Profile and Recent Scans Split -->
+<div class="row g-4">
+    <!-- Left Column: Medical Profile Details -->
+    <div class="col-lg-5">
+        <div class="card card-glass h-100 p-4">
+            <div class="card-body">
+                <h3 class="card-title-custom mb-4">
+                    <i class="bi bi-heart-pulse-fill text-danger"></i> Medical Profile Summary
+                </h3>
+                
+                <ul class="list-group list-group-flush bg-transparent">
+                    <li class="list-group-item bg-transparent text-white border-secondary px-0 py-3">
+                        <div class="small text-muted mb-1">Emergency Contact</div>
+                        <div class="fw-semibold">{{ profile.emergency_contact|default:"Not Configured"|linebreaksbr }}</div>
+                    </li>
+                    <li class="list-group-item bg-transparent text-white border-secondary px-0 py-3">
+                        <div class="small text-muted mb-1">Monitored Allergens</div>
+                        <div>
+                            {% if allergy_list %}
+                                {% for allergy in allergy_list %}
+                                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 px-2.5 py-1.5 rounded-3 me-1 mb-1 text-capitalize">{{ allergy }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted">None listed</span>
+                            {% endif %}
+                        </div>
+                    </li>
+                    <li class="list-group-item bg-transparent text-white border-secondary px-0 py-3">
+                        <div class="small text-muted mb-1">Dietary Restrictions</div>
+                        <div class="fw-semibold">{{ profile.dietary_restrictions|default:"None" }}</div>
+                    </li>
+                    <li class="list-group-item bg-transparent text-white border-0 px-0 py-3">
+                        <div class="small text-muted mb-1">Allergen List File</div>
+                        <div>
+                            {% if profile.uploaded_file %}
+                                <a href="{{ profile.uploaded_file.url }}" class="btn btn-outline-info btn-sm px-3 mt-1" download>
+                                    <i class="bi bi-file-earmark-arrow-down-fill"></i> Download {{ uploaded_file_name }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted small">No allergy text file uploaded</span>
+                            {% endif %}
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{% url 'profile' %}" class="btn btn-outline-light w-100 py-2">
+                        <i class="bi bi-pencil-square"></i> Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Recent Scans Log -->
+    <div class="col-lg-7">
+        <div class="card card-glass h-100 p-4">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h3 class="card-title-custom mb-0">
+                        <i class="bi bi-clock-history text-primary"></i> Recent Scans
+                    </h3>
+                    <a href="{% url 'history' %}" class="text-decoration-none small fw-semibold text-primary">View All</a>
+                </div>
+
+                {% if recent_scans %}
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover align-middle border-secondary mb-0">
+                            <thead>
+                                <tr class="text-muted border-secondary">
+                                    <th>Product</th>
+                                    <th>Barcode</th>
+                                    <th>Result</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for scan in recent_scans %}
+                                    <tr class="border-secondary">
+                                        <td>
+                                            <a href="{% url 'scan_result' barcode=scan.barcode %}" class="text-white text-decoration-none fw-semibold d-block">
+                                                {{ scan.product_name }}
+                                            </a>
+                                        </td>
+                                        <td><code class="text-muted">{{ scan.barcode }}</code></td>
+                                        <td>
+                                            {% if scan.result == 'safe' %}
+                                                <span class="badge badge-safe">SAFE</span>
+                                            {% else %}
+                                                <span class="badge badge-danger">DANGER</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="small text-muted">{{ scan.created_at|date:"M d, H:i" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <div class="fs-1 text-muted mb-3"><i class="bi bi-qr-code-scan"></i></div>
+                        <h5 class="text-muted">No scan history yet</h5>
+                        <p class="small text-muted">Scan a product to check ingredients and build your history.</p>
+                        <a href="{% url 'scan' %}" class="btn btn-primary-custom px-4 py-2 mt-2">
+                            Scan Now
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

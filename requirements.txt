@@ -1,0 +1,8 @@
+Django>=5.0,<5.1
+djangorestframework
+requests
+Pillow
+python-dotenv
+reportlab
+gunicorn
+psycopg2-binary

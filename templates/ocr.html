@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Label OCR Scan - Foreign Allergy Guardian{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card card-glass p-4 text-center">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h2 class="card-title-custom justify-content-center mb-1">
+                        <i class="bi bi-camera text-primary"></i> AI Label OCR & Translation
+                    </h2>
+                    <p class="text-muted">Upload or take a photo of a foreign food label or ingredients list to extract and check allergens.</p>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" class="mt-4">
+                    {% csrf_token %}
+                    
+                    <!-- File drop zone styling -->
+                    <div class="border border-dashed border-secondary rounded-4 p-5 mb-4 bg-dark bg-opacity-20 d-flex flex-column align-items-center justify-content-center cursor-pointer" 
+                         id="drop-zone"
+                         style="border-style: dashed !important; border-width: 2px !important;">
+                        <div class="display-3 text-primary mb-3"><i class="bi bi-cloud-arrow-up-fill"></i></div>
+                        <h5 class="fw-bold text-white">Select Label Image</h5>
+                        <p class="text-muted small">Supports PNG, JPG, JPEG up to 5MB</p>
+                        
+                        <input type="file" name="label_image" id="file-input" class="d-none" accept="image/*" required>
+                        <button type="button" class="btn btn-outline-light btn-sm px-4 mt-2" onclick="document.getElementById('file-input').click();">
+                            Browse Files
+                        </button>
+                    </div>
+
+                    <div id="file-preview-container" class="mb-4 d-none">
+                        <div class="p-3 bg-dark bg-opacity-40 rounded-3 d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3 text-start">
+                                <div class="fs-1 text-info"><i class="bi bi-file-image"></i></div>
+                                <div>
+                                    <h6 class="mb-0 fw-semibold text-white" id="file-name">label-image.jpg</h6>
+                                    <small class="text-muted" id="file-size">1.2 MB</small>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger" id="btn-remove-file">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary-custom w-100 py-3 fs-5">
+                        <i class="bi bi-cpu-fill"></i> Perform AI OCR Scan
+                    </button>
+                </form>
+
+                <div class="text-start mt-5 p-3 rounded-3 bg-primary bg-opacity-10 border border-primary border-opacity-20">
+                    <h6 class="fw-bold text-primary mb-2"><i class="bi bi-stars"></i> Bonus AI Translation Feature</h6>
+                    <p class="small text-muted mb-0">
+                        Does your food label contain ingredients written in Spanish, French, German, Italian, or Japanese? The agent will automatically detect the language, translate names, and run synonym checks to guard you.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const previewContainer = document.getElementById('file-preview-container');
+    const fileNameText = document.getElementById('file-name');
+    const fileSizeText = document.getElementById('file-size');
+    const removeBtn = document.getElementById('btn-remove-file');
+
+    // Make drop zone clickable to trigger file upload
+    dropZone.addEventListener('click', (e) => {
+        if (e.target !== fileInput && !e.target.closest('button')) {
+            fileInput.click();
+        }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (fileInput.files.length > 0) {
+            showPreview(fileInput.files[0]);
+        }
+    });
+
+    // Drag over styling
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-primary', 'bg-primary-subtle');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-primary', 'bg-primary-subtle');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-primary', 'bg-primary-subtle');
+        if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            showPreview(e.dataTransfer.files[0]);
+        }
+    });
+
+    removeBtn.addEventListener('click', () => {
+        fileInput.value = '';
+        previewContainer.classList.add('d-none');
+        dropZone.classList.remove('d-none');
+    });
+
+    function showPreview(file) {
+        fileNameText.textContent = file.name;
+        
+        // Format size
+        let size = file.size / 1024;
+        if (size > 1024) {
+            fileSizeText.textContent = (size / 1024).toFixed(2) + ' MB';
+        } else {
+            fileSizeText.textContent = size.toFixed(1) + ' KB';
+        }
+
+        dropZone.classList.add('d-none');
+        previewContainer.classList.remove('d-none');
+    }
+</script>
+{% endblock %}

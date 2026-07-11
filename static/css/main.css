@@ -1,0 +1,326 @@
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    /* Premium Color Palette (HSL Light System for ultimate visibility) */
+    --primary-hue: 220;
+    --primary: hsl(var(--primary-hue), 85%, 45%);
+    --primary-hover: hsl(var(--primary-hue), 85%, 35%);
+    
+    --bg-app: hsl(210, 40%, 96.1%); /* Soft gray-blue background */
+    --bg-card: hsl(0, 0%, 100%);     /* Pure white cards */
+    --text-main: hsl(222.2, 84%, 4.9%); /* High-contrast dark slate text */
+    --text-muted: hsl(215.4, 16.3%, 38%);
+    --border: hsl(214.3, 31.8%, 91.4%); /* Crisp borders */
+
+    --safe: hsl(142.1, 76.2%, 26.3%); /* Rich accessible green */
+    --safe-bg: hsl(143, 85%, 96%);
+    --danger: hsl(346.8, 84.1%, 49.8%); /* Rich accessible red */
+    --danger-bg: hsl(356, 100%, 97.5%);
+    --warning: hsl(35.2, 91.7%, 32.9%); /* Rich accessible amber */
+    --warning-bg: hsl(48, 100%, 96%);
+
+    --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-blur: blur(12px);
+    --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* Glassmorphism Header (Light Mode) */
+.navbar-glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+}
+
+.navbar-brand-custom {
+    font-weight: 800;
+    font-size: 1.4rem;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #1e40af, #2563eb, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-link-custom {
+    color: var(--text-muted);
+    font-weight: 500;
+    transition: var(--transition-smooth);
+    border-radius: 8px;
+    padding: 0.5rem 1rem !important;
+}
+
+.nav-link-custom:hover, .nav-link-custom.active {
+    color: var(--primary);
+    background-color: hsla(var(--primary-hue), 85%, 45%, 0.08);
+}
+
+/* Overrides for navbar in dark-mode style default classes */
+.navbar-dark .navbar-toggler-icon {
+    filter: invert(1);
+}
+.navbar-dark .navbar-toggler {
+    border-color: var(--border);
+}
+
+/* Premium Dashboard & Forms Cards */
+.card-glass {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    transition: var(--transition-smooth);
+    overflow: hidden;
+}
+
+.card-glass:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border-color: hsla(var(--primary-hue), 85%, 45%, 0.2);
+}
+
+.card-title-custom {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+/* Force Light text colors inside elements */
+.card-glass .text-white, 
+.card-glass h1, 
+.card-glass h2, 
+.card-glass h3, 
+.card-glass h4, 
+.card-glass h5, 
+.card-glass h6, 
+.card-glass .fw-semibold {
+    color: var(--text-main) !important;
+}
+
+.card-glass .text-muted, .card-glass .form-text {
+    color: var(--text-muted) !important;
+}
+
+/* Buttons */
+.btn-primary-custom {
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+    border: none;
+    font-weight: 600;
+    color: #fff !important;
+    padding: 0.6rem 1.5rem;
+    border-radius: 10px;
+    transition: var(--transition-smooth);
+}
+
+.btn-primary-custom:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.btn-outline-light {
+    border-color: var(--border) !important;
+    color: var(--text-main) !important;
+    background-color: transparent;
+}
+
+.btn-outline-light:hover {
+    background-color: var(--bg-app) !important;
+    border-color: var(--text-muted) !important;
+}
+
+/* Input Fields Styling (Accessible High Contrast) */
+.form-control {
+    background-color: #ffffff !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-main) !important;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    transition: var(--transition-smooth);
+}
+
+.form-control:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+}
+
+/* Badges */
+.badge-safe {
+    background-color: var(--safe-bg);
+    color: var(--safe);
+    border: 1px solid rgba(22, 163, 74, 0.2);
+    padding: 0.5em 0.8em;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.badge-danger {
+    background-color: var(--danger-bg);
+    color: var(--danger);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    padding: 0.5em 0.8em;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.badge-warning {
+    background-color: var(--warning-bg);
+    color: var(--warning);
+    border: 1px solid rgba(217, 119, 6, 0.2);
+    padding: 0.5em 0.8em;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+/* Micro-animations */
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.2); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+.pulse-danger {
+    animation: pulseGlow 2s infinite;
+}
+
+/* Result Screen Layouts */
+.result-container {
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    text-align: center;
+    border: 1px solid var(--border);
+}
+
+.result-container.safe {
+    background: linear-gradient(180deg, var(--safe-bg), rgba(22, 163, 74, 0.02));
+    border-color: rgba(22, 163, 74, 0.3);
+}
+
+.result-container.safe .text-success {
+    color: var(--safe) !important;
+}
+
+.result-container.danger {
+    background: linear-gradient(180deg, var(--danger-bg), rgba(220, 38, 38, 0.02));
+    border-color: rgba(220, 38, 38, 0.3);
+}
+
+.result-container.danger .text-danger {
+    color: var(--danger) !important;
+}
+
+.allergen-tag {
+    background: var(--danger-bg);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    color: var(--danger);
+    border-radius: 30px;
+    padding: 0.4rem 1.2rem;
+    display: inline-block;
+    margin: 0.3rem;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+/* Scanner Layout */
+#interactive-scanner {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid var(--border);
+    background-color: #000;
+}
+
+/* List group style updates */
+.list-group-item {
+    background-color: transparent !important;
+    border-color: var(--border) !important;
+    color: var(--text-main) !important;
+}
+
+/* Table light styling overrides */
+.table-dark {
+    --bs-table-bg: var(--bg-card) !important;
+    --bs-table-color: var(--text-main) !important;
+    --bs-table-hover-color: var(--text-main) !important;
+    --bs-table-hover-bg: var(--bg-app) !important;
+    border-color: var(--border) !important;
+}
+.table-dark th {
+    color: var(--text-muted) !important;
+    font-weight: 600;
+    border-color: var(--border) !important;
+}
+.table-dark td {
+    color: var(--text-main) !important;
+    border-color: var(--border) !important;
+}
+
+.table-dark a {
+    color: var(--primary) !important;
+}
+
+.bg-dark {
+    background-color: var(--bg-app) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border);
+}
+
+.text-info {
+    color: var(--primary) !important;
+}
+
+.text-info a {
+    color: var(--primary) !important;
+}
+
+.alert-dismissible {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+}
+
+.alert-dismissible .text-white {
+    color: var(--text-main) !important;
+}
+
+.btn-close-white {
+    filter: invert(1);
+}
+
+/* Footer styling */
+footer {
+    background-color: var(--bg-card);
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 0;
+    margin-top: auto;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}

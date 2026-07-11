@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Scan Barcode - Foreign Allergy Guardian{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card card-glass p-4 text-center">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h2 class="card-title-custom justify-content-center mb-1">
+                        <i class="bi bi-qr-code-scan text-primary"></i> Scan Product Barcode
+                    </h2>
+                    <p class="text-muted">Place the food barcode in front of your camera or enter it manually below.</p>
+                </div>
+
+                <!-- Camera Scanner Container -->
+                <div class="my-4">
+                    <div id="interactive-scanner" class="mx-auto shadow-lg mb-3"></div>
+                    
+                    <div class="d-flex justify-content-center gap-2 mb-4">
+                        <button id="btn-start-scanner" class="btn btn-primary-custom px-4 py-2">
+                            <i class="bi bi-camera-fill"></i> Start Camera
+                        </button>
+                        <button id="btn-stop-scanner" class="btn btn-outline-danger px-4 py-2 d-none">
+                            <i class="bi bi-camera-video-off-fill"></i> Stop Camera
+                        </button>
+                    </div>
+                </div>
+
+                <div class="hr-text text-muted my-4 d-flex align-items-center justify-content-center gap-2">
+                    <hr class="w-25 border-secondary"> <span>OR</span> <hr class="w-25 border-secondary">
+                </div>
+
+                <!-- Manual Barcode Form -->
+                <div class="col-md-8 mx-auto text-start">
+                    <h5 class="fw-bold text-white mb-3">
+                        <i class="bi bi-keyboard"></i> Manual Barcode Entry
+                    </h5>
+                    <form method="post" action="{% url 'scan' %}">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" name="barcode" class="form-control" placeholder="e.g. 4902777005510 or 8801007142410" required>
+                            <button type="submit" class="btn btn-primary-custom">
+                                <i class="bi bi-search"></i> Check Product
+                            </button>
+                        </div>
+                    </form>
+                    <div class="mt-3 text-muted small">
+                        <span class="fw-semibold">Try Test Barcodes:</span>
+                        <a href="{% url 'scan_result' barcode='4902777005510' %}" class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 text-decoration-none ms-1">4902777005510 (Peanuts/Gluten)</a>
+                        <a href="{% url 'scan_result' barcode='8801007142410' %}" class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 text-decoration-none ms-1">8801007142410 (Seaweed - Safe)</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Import html5-qrcode -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script>
+    let html5QrcodeScanner = null;
+
+    const startBtn = document.getElementById('btn-start-scanner');
+    const stopBtn = document.getElementById('btn-stop-scanner');
+    const scannerDiv = document.getElementById('interactive-scanner');
+
+    function onScanSuccess(decodedText, decodedResult) {
+        console.log(`Scan result: ${decodedText}`, decodedResult);
+        // Stop scanning
+        stopScanner();
+        // Redirect to the scan result view
+        window.location.href = `/scanner/scan/result/${decodedText}/`;
+    }
+
+    function onScanFailure(error) {
+        // Failures are expected, do not clutter console
+    }
+
+    function startScanner() {
+        startBtn.classList.add('d-none');
+        stopBtn.classList.remove('d-none');
+        
+        html5QrcodeScanner = new Html5Qrcode("interactive-scanner");
+        html5QrcodeScanner.start(
+            { facingMode: "environment" }, 
+            {
+                fps: 10,
+                qrbox: { width: 280, height: 160 }
+            },
+            onScanSuccess,
+            onScanFailure
+        ).catch(err => {
+            console.error("Unable to start scanner", err);
+            alert("Camera access denied or device has no camera. You can still input barcodes manually!");
+            stopScanner();
+        });
+    }
+
+    function stopScanner() {
+        startBtn.classList.remove('d-none');
+        stopBtn.classList.add('d-none');
+        
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.stop().then(() => {
+                html5QrcodeScanner.clear();
+                html5QrcodeScanner = null;
+            }).catch(err => {
+                console.error("Failed to stop scanner", err);
+            });
+        }
+    }
+
+    startBtn.addEventListener('click', startScanner);
+    stopBtn.addEventListener('click', stopScanner);
+
+    // Clean up on page exit
+    window.addEventListener('beforeunload', () => {
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.stop();
+        }
+    });
+</script>
+{% endblock %}

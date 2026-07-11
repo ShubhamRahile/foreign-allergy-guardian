@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}Scan Result - Foreign Allergy Guardian{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-9 col-lg-8">
+        
+        <!-- Safety Alert Banner -->
+        <div class="result-container {% if status == 'danger' %}danger pulse-danger{% else %}safe{% endif %} mb-4 text-white">
+            {% if status == 'danger' %}
+                <div class="display-1 mb-3"><i class="bi bi-x-octagon-fill text-danger"></i></div>
+                <h1 class="display-4 fw-bold text-danger mb-2">🚫 DO NOT EAT</h1>
+                <h3 class="fw-semibold text-white">Contains Allergens:</h3>
+                <div class="mt-3">
+                    {% for allergen in matched_allergens %}
+                        <span class="allergen-tag">{{ allergen }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="display-1 mb-3"><i class="bi bi-check-circle-fill text-success"></i></div>
+                <h1 class="display-4 fw-bold text-success mb-2">✅ SAFE TO EAT</h1>
+                <p class="fs-4 text-muted mb-0">No registered allergens detected in this product.</p>
+            {% endif %}
+        </div>
+
+        <!-- Voice Alerts Controls (Web Speech API) -->
+        <div class="card card-glass p-3 mb-4 text-center">
+            <div class="card-body py-2">
+                <span class="text-muted me-2"><i class="bi bi-volume-up-fill"></i> Voice Alert:</span>
+                <button id="btn-speak-alert" class="btn btn-outline-light btn-sm px-4">
+                    <i class="bi bi-play-circle-fill"></i> Hear Warning
+                </button>
+            </div>
+        </div>
+
+        <!-- Product Details -->
+        <div class="card card-glass p-4 mb-4">
+            <div class="card-body">
+                <h3 class="card-title-custom mb-3">
+                    <i class="bi bi-box-seam text-info"></i> Product Information
+                </h3>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4 text-muted">Product Name</div>
+                    <div class="col-md-8 fw-semibold text-white fs-5">{{ product_name }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4 text-muted">Barcode / ID</div>
+                    <div class="col-md-8 text-white"><code>{{ barcode }}</code></div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4 text-muted">Data Source</div>
+                    <div class="col-md-8 text-white"><span class="badge bg-secondary">{{ source }}</span></div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4 text-muted">AI Risk Score</div>
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress w-70 bg-dark" style="height: 10px; border-radius: 5px;">
+                                <div class="progress-bar {% if risk_score > 75 %}bg-danger{% elif risk_score > 30 %}bg-warning{% else %}bg-success{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ risk_score }}%;" 
+                                     aria-valuenow="{{ risk_score }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100"></div>
+                            </div>
+                            <span class="fw-bold {% if risk_score > 75 %}text-danger{% elif risk_score > 30 %}text-warning{% else %}text-success{% endif %}">{{ risk_score }}%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cross contamination warnings -->
+                {% if cross_warnings %}
+                    <div class="alert alert-warning bg-warning-subtle text-dark border-0 mt-4 p-3 rounded-3">
+                        <h5 class="fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> Cross-Contamination Warning</h5>
+                        <p class="mb-0 small">The ingredients contain indicators of cross-contamination risk:</p>
+                        <ul class="mb-0 mt-1 small">
+                            {% for warn in cross_warnings %}
+                                <li>"...{{ warn }}..."</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Ingredients List & Translations -->
+        <div class="card card-glass p-4 mb-4">
+            <div class="card-body">
+                <h3 class="card-title-custom mb-3">
+                    <i class="bi bi-translate text-primary"></i> Ingredients & Translation Guide
+                </h3>
+                
+                {% if detected_lang != 'Unknown' %}
+                    <div class="mb-3">
+                        <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-50">Detected Language: {{ detected_lang }}</span>
+                    </div>
+                {% endif %}
+
+                <h5 class="text-muted mt-3">Raw Ingredients List</h5>
+                <div class="bg-dark p-3 rounded-3 text-muted" style="white-space: pre-wrap; font-family: monospace;">{{ ingredients }}</div>
+
+                {% if translated_ingredients != ingredients %}
+                    <h5 class="text-muted mt-4">Allergy Translation & Decoded Terms</h5>
+                    <div class="bg-primary bg-opacity-10 border border-primary border-opacity-25 p-3 rounded-3 text-white" style="white-space: pre-wrap;">{{ translated_ingredients }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Actions and SOS Section -->
+        <div class="row g-3">
+            <div class="col-md-6">
+                <a href="{% url 'scan' %}" class="btn btn-primary-custom w-100 py-2.5 fs-5">
+                    <i class="bi bi-qr-code-scan"></i> Scan Another Product
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-light w-100 py-2.5 fs-5">
+                    <i class="bi bi-house-door"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const speakBtn = document.getElementById("btn-speak-alert");
+        
+        const status = "{{ status }}";
+        const productName = "{{ product_name|escapejs }}";
+        const matchedAllergens = [];
+        {% for allergen in matched_allergens %}
+            matchedAllergens.push("{{ allergen|escapejs }}");
+        {% endfor %}
+
+        let textToSpeak = "";
+        if (status === "danger") {
+            textToSpeak = `Warning! Danger! Do not eat ${productName}. It contains ${matchedAllergens.join(" and ")}.`;
+        } else {
+            textToSpeak = `${productName} is safe to eat. No registered allergens detected.`;
+        }
+
+        // Auto announce alert on load (after small timeout to respect browser settings)
+        setTimeout(() => {
+            speak(textToSpeak, 0.95);
+        }, 800);
+
+        speakBtn.addEventListener("click", () => {
+            speak(textToSpeak, 1.0);
+        });
+
+        function speak(text, pitch) {
+            if ('speechSynthesis' in window) {
+                // Cancel active speeches
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.pitch = pitch;
+                utterance.rate = 1.0;
+                
+                // Try to find a nice English voice
+                const voices = window.speechSynthesis.getVoices();
+                const engVoice = voices.find(v => v.lang.startsWith('en'));
+                if (engVoice) utterance.voice = engVoice;
+                
+                window.speechSynthesis.speak(utterance);
+            } else {
+                console.warn("Speech Synthesis is not supported in this browser.");
+            }
+        }
+    });
+</script>
+{% endblock %}
